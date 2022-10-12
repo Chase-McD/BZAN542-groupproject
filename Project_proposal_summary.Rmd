@@ -1,0 +1,62 @@
+---
+title: "Group Project Proposal"
+author: "Chase McDonald"
+date: "2022-10-11"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Dimensions**
+```{r}
+df = read.csv("UserCarData.csv")
+dim(df)
+```
+**Summary stats**
+```{r}
+library(tidyverse)
+
+df <- df %>% 
+  group_by(Sales_ID) %>% 
+  mutate(Sold = sum(sold=='Y'))
+
+df <- df[,-18]
+         
+summary(df) 
+
+```
+**Data structure**
+
+```{r}
+str(df)
+```
+**some pretty graphs**
+
+```{r}
+library(ggplot2)
+library(gridExtra)
+
+selling_price <- df %>% 
+  group_by(Sold) %>% 
+  summarise(Avg.Price = mean(selling_price))
+
+barplot<- ggplot(selling_price, aes(x = as.factor(Sold), y =Avg.Price )) + geom_bar(stat = 'identity') + theme_minimal() + labs(title = 'Price of sold vs. not sold cars', x= 'Not sold (0) vs. Sold (1)' )
+
+###############################################################3
+
+location <- df %>% 
+  group_by(State.or.Province) %>% 
+  summarise(Avg.Price = mean(selling_price))  
+
+##################################################################
+
+box <- ggplot(df, aes(x=selling_price)) + geom_histogram() + theme_minimal() + labs(title = 'The distribution of selling prices')
+  
+
+print(grid.arrange(barplot,box, ncol =2))
+```
+
