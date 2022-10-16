@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 df = read.csv("UserCarData.csv")
 dim(df)
-#did this push work
+#did this push work again
 ```
 **Summary stats**
 ```{r}
@@ -29,6 +29,15 @@ df <- df[,-18]
          
 summary(df) 
 
+#below is the top areas that sold ratio wise
+
+most_sold = df %>%
+  group_by(State.or.Province) %>%
+  summarise(avg_sold = mean(Sold=='1')) %>%
+  arrange(desc(avg_sold)) %>%
+  head(5)
+
+most_sold
 ```
 **Data structure**
 
@@ -46,7 +55,7 @@ selling_price <- df %>%
   summarise(Avg.Price = mean(selling_price))
 
 barplot<- ggplot(selling_price, aes(x = as.factor(Sold), y =Avg.Price )) + geom_bar(stat = 'identity') + theme_minimal() + labs(title = 'Price of sold vs. not sold cars', x= 'Not sold (0) vs. Sold (1)' )
-
+barplot
 ###############################################################3
 
 location <- df %>% 
