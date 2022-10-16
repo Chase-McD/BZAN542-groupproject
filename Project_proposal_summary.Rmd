@@ -15,7 +15,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 df = read.csv("UserCarData.csv")
 dim(df)
-#did this push work
 ```
 **Summary stats**
 ```{r}
@@ -29,6 +28,13 @@ df <- df[,-18]
          
 summary(df) 
 
+df[sapply(df,is.character)] <- lapply(df[sapply(df,is.character)],as.factor) # Changes all character types to factors for each column
+df$year <- as.factor(df$year) # Changes int year to factor year
+
+df <- df %>%
+  mutate(selling_price = selling_price * 0.01,
+         mi_driven = round(km_driven * 0.6213712)) %>%
+  select(-c(km_driven)) # Converts Rubies to Dollars, Converts Km to Miles, and removes the Km column
 ```
 **Data structure**
 
