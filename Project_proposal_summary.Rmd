@@ -32,7 +32,7 @@ summary(df)
 **Data structure**
 
 ```{r}
-str(df)
+glimpse(df)
 ```
 **some pretty graphs**
 
