@@ -41,7 +41,7 @@ library(ggplot2)
 library(gridExtra)
 
 selling_price <- df %>% 
-  group_by(Sold) %>% 
+  grou_by(Sold) %>% 
   summarise(Avg.Price = mean(selling_price))
 
 barplot<- ggplot(selling_price, aes(x = as.factor(Sold), y =Avg.Price )) + geom_bar(stat = 'identity') + theme_minimal() + labs(title = 'Price of sold vs. not sold cars', x= 'Not sold (0) vs. Sold (1)' )
