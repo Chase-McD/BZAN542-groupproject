@@ -22,14 +22,30 @@ suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(caret))
 suppressPackageStartupMessages(library(rpart))
 suppressPackageStartupMessages(library(doParallel))
+suppressPackageStartupMessages(library(rpart.plot))
         
 df[sapply(df,is.character)] <- lapply(df[sapply(df,is.character)],as.factor) # Changes all character types to factors for each column
 df$year <- as.factor(df$year) # Changes int year to factor year
+df$seats <- as.factor(df$seats) # Changes int seats to factor seats
+df$mileage <- as.factor(df$mileage) # Changes int mpg to factor mpg
 
 df <- df %>%
   mutate(selling_price = selling_price * 0.01,
-         mi_driven = round(km_driven * 0.6213712)) %>%
-  select(-c(km_driven,State.or.Province,City,torque,Region)) # Converts Rubies to Dollars, Converts Km to Miles, and removes the Km column, State or Province, City, Torque, and Region due to zero variance (Can be added back later)
+         mi_driven = round(km_driven * 0.6213712),
+         max_power = as.integer(max_power),
+         mileage = as.integer(mileage),
+         selling_price = as.integer(selling_price)) %>%
+  select(-c(km_driven,torque)) # Converts Rubies to Dollars, Converts Km to Miles, and removes the Km column. Removed Torque until we can figure out what to do with it
+
+
+
+df <- df[,-1]
+train.rows <- sample(1:nrow(df), 0.70*nrow(df))
+TRAIN <- df[train.rows,]
+HOLDOUT <- df[-train.rows,]
+
+infodensity <- nearZeroVar(df, saveMetrics= TRUE); infodensity
+fitControl <- trainControl(method = "cv", number = 10, classProbs = TRUE, allowParallel = TRUE, verboseIter = FALSE)
 ```
 **Data structure**
 
@@ -65,16 +81,6 @@ print(grid.arrange(barplot,box, ncol =2))
 
 
 ```{r}
-df <- df[,-1]
-train.rows <- sample(1:nrow(df), 0.70*nrow(df))
-TRAIN <- df[train.rows,]
-HOLDOUT <- df[-train.rows,]
-
-infodensity <- nearZeroVar(df, saveMetrics= TRUE); infodensity
-fitControl <- trainControl(method = "cv", number = 10, allowParallel = TRUE)
-```
-
-```{r}
 GLM <- train(sold ~., data = TRAIN, method = "glm", trControl = fitControl, preProc = c("center","scale"))
 
 GLM$results
@@ -100,22 +106,31 @@ varImp(GLMnet)
 ```{r}
 treeGrid <- expand.grid(cp=10^seq(-5,-1,length=25))
 
+cluster <- makeCluster(detectCores() - 1)
+registerDoParallel(cluster) 
+
 TREE <- train(sold~.,data=TRAIN,method='rpart', tuneGrid=treeGrid,trControl=fitControl, preProc = c("center", "scale"))
+stopCluster(cluster) 
+registerDoSEQ() 
 
 plot(TREE) 
 
 TREE$results[rownames(TREE$bestTune),] 
 
+varImp(TREE)
 postResample(predict(TREE,newdata=HOLDOUT),HOLDOUT$sold)
+
+TREE <- rpart(sold ~.,data = TRAIN,cp = 0.002154435)
+rpart.plot(TREE)
 ```
 
 ```{r}
-forestGrid <- expand.grid(mtry=c(1,2,3,4,5,6,7,8,9,10,11,12,13)) 
+forestGrid <- expand.grid(mtry=c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16)) 
 
 cluster <- makeCluster(detectCores() - 1)
 registerDoParallel(cluster) 
 
-FOREST <- train(sold~.,data=TRAIN,method='rf',tuneGrid=forestGrid, trControl=fitControl, preProc = c("center", "scale"))
+FOREST <- train(sold ~.,data=TRAIN,method='rf',tuneGrid=forestGrid, trControl=fitControl, preProc = c("center", "scale"))
 stopCluster(cluster) 
 registerDoSEQ() 
 
@@ -142,10 +157,10 @@ postResample(predict(SVM,newdata=HOLDOUT),HOLDOUT$sold)
 ```
 
 ```{r}
+knnGrid <- expand.grid(k=1:50)
+
 cluster <- makeCluster(detectCores() - 1)
 registerDoParallel(cluster) 
-
-knnGrid <- expand.grid(k=1:50)
 KNN <- train(sold~.,data=TRAIN, method='knn', trControl=fitControl,tuneGrid=knnGrid,preProc = c("center", "scale"))
 
 stopCluster(cluster) 
@@ -230,16 +245,20 @@ plot(GBM)
 ```
 
 ```{r}
-gbmGrid <- expand.grid(n.trees=c(5,10,25,50,100,200,500),interaction.depth=1:10,shrinkage=c(.01,.001,0001),n.minobsinnode=c(1:10))
+xgboostGrid <- expand.grid(eta=c(0.1,0.001),nrounds=c(50,100,200,500,1000,1500),max_depth=1:5, min_child_weight=1, gamma=c(.1,.5,0,1,5,10), colsample_bytree=c(0.6,0.8,1), subsample=c(0.6,0.8,1.0))
 
-cluster <- makeCluster(detectCores() - 1) 
+cluster <- makeCluster(detectCores() - 1)
 registerDoParallel(cluster) 
-GBM <- train(sold~.,data=TRAIN, method='gbm',tuneGrid=gbmGrid,verbose=FALSE,trControl=fitControl, preProc = c("center", "scale"))
-stopCluster(cluster) 
-registerDoSEQ()
 
-GBM$results[rownames(GBM$bestTune),]
-postResample(predict(GBM,newdata=HOLDOUT,n.trees=5),HOLDOUT$sold)
-plot(GBM) 
+XTREME <- train(Quality~.,data=TRAIN, method="xgbTree", trControl=fitControl, tuneGrid=xgboostGrid, preProc = c("center", "scale"), verbose=FALSE)
+stopCluster(cluster) 
+registerDoSEQ() 
+
+XTREME$results[rownames(XTREME$bestTune),] 
+postResample(predict(XTREME,newdata=HOLDOUT),HOLDOUT$sold) 
+
+varImp(XTREME)
+
+plot(XTREME) 
 ```
 
