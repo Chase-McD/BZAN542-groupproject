@@ -18,7 +18,7 @@ dim(df)
 ```
 **Summary stats**
 ```{r}
-<<<<<<< HEAD
+
 library(tidyverse)
 
 df <- df %>% 
@@ -30,14 +30,14 @@ df <- df[,-18]
 #################################################
 
 
-=======
+
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(caret))
 suppressPackageStartupMessages(library(rpart))
 suppressPackageStartupMessages(library(doParallel))
 suppressPackageStartupMessages(library(rpart.plot))
         
->>>>>>> origin/main
+
 df[sapply(df,is.character)] <- lapply(df[sapply(df,is.character)],as.factor) # Changes all character types to factors for each column
 df$year <- as.factor(df$year) # Changes int year to factor year
 df$seats <- as.factor(df$seats) # Changes int seats to factor seats
@@ -48,18 +48,19 @@ df$mileage <- as.factor(df$mileage) # Changes int mpg to factor mpg
 
 df <- df %>%
   mutate(selling_price = selling_price * 0.01,
-<<<<<<< HEAD
+
          mi_driven = round(km_driven * 0.6213712)) %>%
   select(-c(km_driven)) # Converts Rubies to Dollars, Converts Km to Miles, and removes the Km column
 
 names(df) <- tolower(names(df))
 summary(df) 
-=======
-         mi_driven = round(km_driven * 0.6213712),
-         max_power = as.integer(max_power),
-         mileage = as.integer(mileage),
-         selling_price = as.integer(selling_price)) %>%
-  select(-c(km_driven,torque)) # Converts Rubies to Dollars, Converts Km to Miles, and removes the Km column. Removed Torque until we can figure out what to do with it
+
+df$mi_driven = round(df$km_driven * 0.6213712)
+df$max_power = as.integer(df$max_power)
+df$mileage = as.integer(df$mileage)
+df = df %>% 
+  mutate(selling_price = as.integer(selling_price)) %>%
+  select(-torque) # Converts Rubies to Dollars, Converts Km to Miles, and removes the Km column. Removed Torque until we can figure out what to do with it
 
 
 
@@ -70,7 +71,7 @@ HOLDOUT <- df[-train.rows,]
 
 infodensity <- nearZeroVar(df, saveMetrics= TRUE); infodensity
 fitControl <- trainControl(method = "cv", number = 10, classProbs = TRUE, allowParallel = TRUE, verboseIter = FALSE)
->>>>>>> origin/main
+
 ```
 **Data structure**
 
@@ -287,4 +288,46 @@ varImp(XTREME)
 
 plot(XTREME) 
 ```
+
+
+
+**regression**
+
+```{r}
+# glimpse(df)
+#note since our variable of interest is bianary, this does not offer any insight.
+
+linear_model = lm(sold ~ ., data = df)
+# linear_model
+
+
+```
+**kmeans**
+
+```{r}
+library(factoextra)
+library(cluster)
+
+###########################################################3
+
+df <- subset(df, select = -sales_id)
+
+df.numeric = df %>% 
+  select(c(mileage,selling_price,engine,max_power,mi_driven,sold))
+
+
+
+plot = fviz_nbclust(df.numeric, kmeans, method = "wss") #elbow plot
+plot
+
+km <- kmeans(df.numeric, centers = 6, nstart = 25)
+km
+
+table(km$cluster)
+
+#plot
+fviz_cluster(km, data = df.numeric)
+
+```
+
 
