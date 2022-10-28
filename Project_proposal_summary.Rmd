@@ -111,7 +111,7 @@ print(grid.arrange(barplot,box, ncol =2))
 GLM <- train(sold ~., data = TRAIN, method = "glm", trControl = fitControl, preProc = c("center","scale"))
 
 GLM$results
-
+summary(GLM)
 postResample(predict(GLM,newdata = HOLDOUT), HOLDOUT$sold)
 varImp(GLM)
 ```
@@ -308,7 +308,7 @@ linear_model = lm(sold ~ ., data = df)
 library(factoextra)
 library(cluster)
 
-###########################################################3
+###########################################################
 
 df <- subset(df, select = -sales_id)
 
@@ -330,4 +330,62 @@ fviz_cluster(km, data = df.numeric)
 
 ```
 
+
+**logistic regression**
+
+```{r}
+library(fastDummies)
+library(tidyverse)
+
+# df_dummies =
+#   dummy_columns(df, select_columns = c('name','fuel','seller_type','transmission','owner','seats'))
+#   
+# 
+df_logistic = subset(df, select = -c(name))
+
+# glimpse(df_dummies)
+
+#train and test data
+sample <- sample(c(TRUE, FALSE), nrow(df_logistic), replace=TRUE, prob=c(0.7,0.3))
+train <- df_logistic[sample, ]
+test <- df_logistic[!sample, ]  
+
+options(scipen=999)
+
+#general linear model (glm)
+
+model <- glm(sold~ .-name, family="binomial", data=train)
+summary(model)
+
+#like r^2 this value needs to be above 0.4 to be significant
+pR2(model)["McFadden"]
+#not very high, notice the only significant indicator is selling price
+
+#how important is each variable
+varImp(model)
+
+#had to remove name for some reason
+model2 <- glm(sold~ ., family="binomial", data=train)
+summary(model2)
+
+predicted = predict(model2, test, type="response")
+
+test$sold <- ifelse(test$sold=="Y", 1, 0)
+
+#optimal cutoff
+library(InformationValue)
+
+optimal <- optimalCutoff(test$sold, predicted)[1]
+optimal
+
+#if the prob is 0.42 or higher we will classify as sell
+
+confusionMatrix(test$sell, predicted)
+
+#error rate
+misClassError(test$sold, predicted, threshold=optimal)
+
+#acuracy rate
+1-(misClassError(test$sold, predicted, threshold=optimal))
+```
 
