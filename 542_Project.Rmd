@@ -1,1 +1,12 @@
-##Let's use this as our final complete file
+
+The following project uses the data set **"UserCarData.csv"** that was obtained from Kaggle.com. The data contains 18 features and 7906 records. In our initial effort to begin the project we cleaned the data by changing Km to miles and currency from Rupees to USD. The variable of interest **"sold"** was changed to a dummy variable. 
+
+The focus of our model was to find the best ML algorithm to indicate if a car would sell or not sell based in the other 17 variables inside our data set. We found the greatest variable importance in _____ variables.
+
+
+```{r}
+df = read.csv("UserCarData.csv")
+dim(df)
+head(df, 5)
+
+```
