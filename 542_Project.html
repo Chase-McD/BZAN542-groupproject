@@ -365,17 +365,39 @@ pre code {
 </div>
 
 
+<p><strong>Introduction</strong></p>
 <p>The following project uses the data set
 <strong>“UserCarData.csv”</strong> that was obtained from Kaggle.com.
 The data contains 18 features and 7906 records. In our initial effort to
 begin the project we cleaned the data by changing Km to miles and
 currency from Rupees to USD. The variable of interest
-<strong>“sold”</strong> was changed to a dummy variable.</p>
+<strong>“sold”</strong> was changed to a dummy variable. After cleaning
+the data, we ran 10 models. Specifically, we ran GLM, GLMnet, Decision
+tree, Random Forrest, SVM, KNN, SVMRadialGrid, GBM, nnet, XGboost.
+Lastly, we attempted to run AutoML to find the best model for our
+data.</p>
 <p>The focus of our model was to find the best ML algorithm to indicate
 if a car would sell or not sell based in the other 17 variables inside
 our data set. We found the greatest variable importance in _____
 variables.</p>
-<pre class="r"><code>df = read.csv(&quot;UserCarData.csv&quot;)
+<p><strong>Packages</strong></p>
+<pre><code>## 
+## Attaching package: &#39;lubridate&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     date, intersect, setdiff, union</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<p><strong>Data Description</strong></p>
+<pre class="r"><code>library()
+library(dplyr)
+df = read.csv(&quot;UserCarData.csv&quot;)
 dim(df)</code></pre>
 <pre><code>## [1] 7906   18</code></pre>
 <pre class="r"><code>head(df, 5)</code></pre>
@@ -397,6 +419,33 @@ dim(df)</code></pre>
 ## 3     78.00    12.7@ 2,700(kgm@ rpm)     5    Y
 ## 4     90.00 22.4 kgm at 1750-2750rpm     5    Y
 ## 5     88.20    11.5@ 4,500(kgm@ rpm)     5    Y</code></pre>
+<pre class="r"><code>glimpse(df)</code></pre>
+<pre><code>## Rows: 7,906
+## Columns: 18
+## $ Sales_ID          &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 1…
+## $ name              &lt;chr&gt; &quot;Maruti&quot;, &quot;Skoda&quot;, &quot;Honda&quot;, &quot;Hyundai&quot;, &quot;Maruti&quot;, &quot;Hy…
+## $ year              &lt;int&gt; 2014, 2014, 2006, 2010, 2007, 2017, 2007, 2001, 2011…
+## $ selling_price     &lt;int&gt; 450000, 370000, 158000, 225000, 130000, 440000, 9600…
+## $ km_driven         &lt;int&gt; 145500, 120000, 140000, 127000, 120000, 45000, 17500…
+## $ Region            &lt;chr&gt; &quot;East&quot;, &quot;East&quot;, &quot;Central&quot;, &quot;Central&quot;, &quot;East&quot;, &quot;East&quot;…
+## $ State.or.Province &lt;chr&gt; &quot;District of Columbia&quot;, &quot;New York&quot;, &quot;Illinois&quot;, &quot;Ill…
+## $ City              &lt;chr&gt; &quot;Washington&quot;, &quot;New York City&quot;, &quot;Chicago&quot;, &quot;Chicago&quot;,…
+## $ fuel              &lt;chr&gt; &quot;Diesel&quot;, &quot;Diesel&quot;, &quot;Petrol&quot;, &quot;Diesel&quot;, &quot;Petrol&quot;, &quot;P…
+## $ seller_type       &lt;chr&gt; &quot;Individual&quot;, &quot;Individual&quot;, &quot;Individual&quot;, &quot;Individua…
+## $ transmission      &lt;chr&gt; &quot;Manual&quot;, &quot;Manual&quot;, &quot;Manual&quot;, &quot;Manual&quot;, &quot;Manual&quot;, &quot;M…
+## $ owner             &lt;chr&gt; &quot;First_Owner&quot;, &quot;Second_Owner&quot;, &quot;Third_Owner&quot;, &quot;First…
+## $ mileage           &lt;dbl&gt; 23.40, 21.14, 17.70, 23.00, 16.10, 20.14, 17.30, 16.…
+## $ engine            &lt;int&gt; 1248, 1498, 1497, 1396, 1298, 1197, 1061, 796, 1364,…
+## $ max_power         &lt;dbl&gt; 74.00, 103.52, 78.00, 90.00, 88.20, 81.86, 57.50, 37…
+## $ torque            &lt;chr&gt; &quot;190Nm@ 2000rpm&quot;, &quot;250Nm@ 1500-2500rpm&quot;, &quot;12.7@ 2,70…
+## $ seats             &lt;int&gt; 5, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5, 5, 5, 7, 5, 5…
+## $ sold              &lt;chr&gt; &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y…</code></pre>
+<p><strong>Best Models</strong> <em>Name of model here</em></p>
+<p><em>Name of model here</em></p>
+<p><em>Name of model here</em></p>
+<p><strong>Worst Models</strong> <em>Name of model here</em></p>
+<p><em>Name of model here</em></p>
+<p><em>Name of model here</em></p>
 
 
 

@@ -1,12 +1,59 @@
+**Introduction**
 
-The following project uses the data set **"UserCarData.csv"** that was obtained from Kaggle.com. The data contains 18 features and 7906 records. In our initial effort to begin the project we cleaned the data by changing Km to miles and currency from Rupees to USD. The variable of interest **"sold"** was changed to a dummy variable. 
+The following project uses the data set **"UserCarData.csv"** that was obtained from Kaggle.com. The data contains 18 features and 7906 records. In our initial effort to begin the project we cleaned the data by changing Km to miles and currency from Rupees to USD. The variable of interest **"sold"** was changed to a dummy variable. After cleaning the data, we ran 10 models. Specifically, we ran GLM, GLMnet, Decision tree, Random Forrest, SVM, KNN, SVMRadialGrid, GBM, nnet, XGboost. Lastly, we attempted to run AutoML to find the best model for our data.
 
 The focus of our model was to find the best ML algorithm to indicate if a car would sell or not sell based in the other 17 variables inside our data set. We found the greatest variable importance in _____ variables.
 
+**Packages**
+```{r,echo = FALSE, results='hide'}
+library(lubridate)
+library(dplyr)
+```
+
+
+**Data Description**
 
 ```{r}
+library()
+library(dplyr)
 df = read.csv("UserCarData.csv")
 dim(df)
 head(df, 5)
+glimpse(df)
+```
+
+**Best Models**
+*Name of model here*
+```{r}
 
 ```
+
+*Name of model here*
+```{r}
+
+```
+
+*Name of model here*
+```{r}
+
+```
+
+
+**Worst Models**
+*Name of model here*
+```{r}
+
+```
+
+*Name of model here*
+```{r}
+
+```
+
+*Name of model here*
+```{r}
+
+```
+
+
+
