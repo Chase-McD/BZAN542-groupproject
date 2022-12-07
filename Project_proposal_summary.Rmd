@@ -14,7 +14,6 @@ knitr::opts_chunk$set(echo = TRUE)
 **Dimensions**
 ```{r}
 df = read.csv("UserCarData.csv")
-dim(df)
 ```
 **Summary stats**
 ```{r}
@@ -28,8 +27,6 @@ df <- df %>%
 df <- df[,-18]
          
 #################################################
-
-
 
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(caret))
@@ -73,39 +70,6 @@ infodensity <- nearZeroVar(df, saveMetrics= TRUE); infodensity
 fitControl <- trainControl(method = "cv", number = 10, classProbs = TRUE, allowParallel = TRUE, verboseIter = FALSE)
 
 ```
-**Data structure**
-
-```{r}
-summary(df)
-glimpse(df)
-```
-**some pretty graphs**
-
-```{r}
-library(ggplot2)
-library(gridExtra)
-library(ggthemes)
-
-selling_price <- df %>% 
-  group_by(Sold) %>% 
-  summarise(Avg.Price = mean(selling_price))
-
-barplot<- ggplot(selling_price, aes(x = as.factor(Sold), y =Avg.Price )) + geom_bar(stat = 'identity') + theme_wsj() + labs(title = 'Price of sold vs. not sold', y= 'Price' ); barplot
-
-###############################################################3
-
-location <- df %>% 
-  group_by(State.or.Province) %>% 
-  summarise(Avg.Price = mean(selling_price))  
-
-##################################################################
-
-box <- ggplot(df, aes(x=selling_price)) + geom_histogram() + theme_wsj() + labs(title = 'Distribution of Price'); box
-  
-
-print(grid.arrange(barplot,box, ncol =2))
-```
-
 
 ```{r}
 GLM <- train(sold ~., data = TRAIN, method = "glm", trControl = fitControl, preProc = c("center","scale"))
@@ -387,5 +351,9 @@ misClassError(test$sold, predicted, threshold=optimal)
 
 #acuracy rate
 1-(misClassError(test$sold, predicted, threshold=optimal))
+```
+
+```{r}
+
 ```
 
