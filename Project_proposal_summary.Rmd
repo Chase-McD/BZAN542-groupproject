@@ -55,7 +55,6 @@ df <- df %>%
 names(df) <- tolower(names(df))
 summary(df) 
 
-df$mi_driven = round(df$km_driven * 0.6213712)
 df$max_power = as.integer(df$max_power)
 df$mileage = as.integer(df$mileage)
 df = df %>% 
