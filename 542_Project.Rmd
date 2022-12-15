@@ -1,1 +1,171 @@
-##Let's use this as our final complete file
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+# Predicting Car Sales from a Cross-Sectional Data Set
+
+## Introduction
+
+The following project uses the data set **"UserCarData.csv"** that was obtained from Kaggle.com. The data contains 18 features and 7906 records. In our initial effort to begin the project we cleaned the data by changing Km to miles and currency from Rupees to USD. The variable of interest **"sold"** was changed to a dummy variable. After cleaning the data, we ran 10 models. Specifically, we ran GLM, GLMnet, Decision tree, Random Forrest, SVM, KNN, SVMRadialGrid, GBM, nnet, XGboost. Lastly, we attempted to run AutoML to find the best model for our data.
+
+
+**Packages**
+```{r,echo = FALSE, results='hide'}
+
+# install.packages("rmarkdown")
+library(rmarkdown)
+library(knitr)
+library(lubridate)
+library(dplyr)
+
+```
+
+
+**Data Description**
+
+```{r, include=FALSE, results = 'hide'}
+
+df = read.csv("UserCarData.csv")
+dim(df)
+head(df, 5)
+glimpse(df)
+
+```
+**Cleaning the Data**
+
+```{r, include=FALSE, results='hide'}
+
+df <- df %>% 
+  group_by(Sales_ID) %>% 
+  mutate(Sold = sum(sold=='Y'))
+
+df <- df[,-18]
+         
+#################################################
+
+
+
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(caret))
+suppressPackageStartupMessages(library(rpart))
+suppressPackageStartupMessages(library(doParallel))
+suppressPackageStartupMessages(library(rpart.plot))
+        
+
+df[sapply(df,is.character)] <- lapply(df[sapply(df,is.character)],as.factor) # Changes all character types to factors for each column
+df$year <- as.factor(df$year) # Changes int year to factor year
+df$seats <- as.factor(df$seats) # Changes int seats to factor seats
+df$mileage <- as.factor(df$mileage) # Changes int mpg to factor mpg
+
+#####################################################
+
+
+df <- df %>%
+  mutate(selling_price = selling_price * 0.01,
+
+         mi_driven = round(km_driven * 0.6213712)) %>%
+  select(-c(km_driven)) # Converts Rubies to Dollars, Converts Km to Miles, and removes the Km column
+
+names(df) <- tolower(names(df))
+summary(df) 
+
+df$max_power = as.integer(df$max_power)
+df$mileage = as.integer(df$mileage)
+df = df %>% 
+  mutate(selling_price = as.integer(selling_price)) %>%
+  select(-torque) # Converts Rubies to Dollars, Converts Km to Miles, and removes the Km column. Removed Torque until we can figure out what to do with it
+
+
+
+df <- df[,-1]
+train.rows <- sample(1:nrow(df), 0.70*nrow(df))
+TRAIN <- df[train.rows,]
+HOLDOUT <- df[-train.rows,]
+
+infodensity <- nearZeroVar(df, saveMetrics= TRUE); infodensity
+fitControl <- trainControl(method = "cv", number = 10, classProbs = TRUE, allowParallel = TRUE, verboseIter = FALSE)
+
+```
+
+**Clean Data**
+
+```{r}
+
+head(df,5)
+
+```
+
+
+## Best Models
+*GLM*
+```{r}
+GLM <- train(sold ~., data = TRAIN, method = "glm", trControl = fitControl, preProc = c("center","scale"))
+
+GLM$results
+summary(GLM)
+postResample(predict(GLM,newdata = HOLDOUT), HOLDOUT$sold)
+varImp(GLM)
+
+```
+
+*KNN*
+```{r}
+knnGrid <- expand.grid(k=1:50)
+
+cluster <- makeCluster(detectCores() - 1)
+registerDoParallel(cluster)
+KNN <- train(sold~.,data=TRAIN, method='knn', trControl=fitControl,tuneGrid=knnGrid,preProc = c("center", "scale"))
+
+stopCluster(cluster)
+registerDoSEQ()
+plot(KNN)
+
+KNN$results[rownames(KNN$bestTune),]
+varImp(KNN)
+postResample(predict(KNN, newdata = HOLDOUT), HOLDOUT$sold)
+
+```
+
+**Worst Models**
+*Decision Tree*
+```{r}
+treeGrid <- expand.grid(cp=10^seq(-5,-1,length=25))
+
+cluster <- makeCluster(detectCores() - 1)
+registerDoParallel(cluster) 
+
+TREE <- train(sold~.,data=TRAIN,method='rpart', tuneGrid=treeGrid,trControl=fitControl, preProc = c("center", "scale"))
+stopCluster(cluster) 
+registerDoSEQ() 
+
+plot(TREE) 
+
+TREE$results[rownames(TREE$bestTune),] 
+
+varImp(TREE)
+postResample(predict(TREE,newdata=HOLDOUT),HOLDOUT$sold)
+
+TREE <- rpart(sold ~.,data = TRAIN,cp = 0.002154435)
+rpart.plot(TREE)
+
+```
+
+*SVM Linear*
+```{r}
+
+svmLinearGrid <- expand.grid(C=2^(1:2) )
+
+cluster <- makeCluster(detectCores() - 1)
+registerDoParallel(cluster) 
+SVM <- train(sold~.,data=TRAIN,method='svmLinear', trControl=fitControl,tuneGrid = svmLinearGrid, preProc = c("center", "scale"))
+stopCluster(cluster) 
+registerDoSEQ() 
+
+plot(SVM) 
+
+SVM$results[rownames(SVM$bestTune),] 
+
+postResample(predict(SVM,newdata=HOLDOUT),HOLDOUT$sold)
+
+```
